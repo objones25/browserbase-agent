@@ -5,6 +5,7 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "browserbase-agent",
+	"account_id": "a9880cecd23184dd97322a9092d3d797",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-11-25",
 	"compatibility_flags": ["nodejs_compat"],
