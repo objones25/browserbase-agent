@@ -225,6 +225,103 @@ Any MCP-compatible server can be used. Popular options include:
 
 The agent will automatically discover available tools from the MCP server and use them when appropriate for the task.
 
+## Advanced Examples
+
+### Multi-step Research
+
+Research React 19 features by navigating through documentation:
+
+```bash
+curl -N -X POST https://browserbase-agent.ap-a98.workers.dev \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Go to react.dev, navigate to the Blog, find the React 19 announcement, and summarize the key new features",
+    "url": "https://react.dev",
+    "maxSteps": 25,
+    "context": "Focus on features related to Server Components, Actions, and new hooks",
+    "stream": true
+  }'
+```
+
+### Documentation Search with MCP
+
+Use Cloudflare Docs MCP to search without opening a browser:
+
+```bash
+curl -N -X POST https://browserbase-agent.ap-a98.workers.dev \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Search for information about Workers AI and explain how to use it for text generation",
+    "integrations": [
+      "https://docs.mcp.cloudflare.com/mcp"
+    ],
+    "maxSteps": 10,
+    "stream": true
+  }'
+```
+
+### Wikipedia Information Extraction
+
+Extract structured information from Wikipedia:
+
+```bash
+curl -N -X POST https://browserbase-agent.ap-a98.workers.dev \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Go to the Wikipedia page for Artificial Intelligence and extract the first paragraph that defines what AI is",
+    "url": "https://en.wikipedia.org/wiki/Artificial_intelligence",
+    "maxSteps": 10,
+    "stream": true
+  }'
+```
+
+### News Aggregation
+
+Extract headlines and summaries from news sites:
+
+```bash
+curl -N -X POST https://browserbase-agent.ap-a98.workers.dev \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Go to news.ycombinator.com and extract the titles and URLs of the top 5 posts",
+    "url": "https://news.ycombinator.com",
+    "maxSteps": 10,
+    "domSettleTimeoutMs": 2000,
+    "stream": true
+  }'
+```
+
+### Package Documentation Lookup
+
+Search npm package documentation:
+
+```bash
+curl -N -X POST https://browserbase-agent.ap-a98.workers.dev \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Search for the Zod npm package, navigate to its page, and summarize what the library does and its main use cases",
+    "url": "https://npmjs.com",
+    "maxSteps": 20,
+    "stream": true
+  }'
+```
+
+### Blog Content Extraction
+
+Extract article content with metadata:
+
+```bash
+curl -N -X POST https://browserbase-agent.ap-a98.workers.dev \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Visit the Cloudflare blog, find the most recent post about AI, and extract the title, author, date, and a summary of the key points",
+    "url": "https://blog.cloudflare.com",
+    "maxSteps": 20,
+    "domSettleTimeoutMs": 3000,
+    "stream": true
+  }'
+```
+
 ## Architecture
 
 ```

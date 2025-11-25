@@ -104,6 +104,15 @@ export function createStreamingHandler(): {
           actionDesc = `→ Action: ${action.action}`;
         } else if (action.type === "extract") {
           actionDesc = `→ Extracted data`;
+          // If extraction result exists, format it nicely
+          if (action.extract) {
+            try {
+              const formatted = JSON.stringify(action.extract, null, 2);
+              sendMessage(`\n${formatted}\n`);
+            } catch {
+              // Ignore formatting errors
+            }
+          }
         } else if (action.type === "close") {
           actionDesc = `→ Task completed: ${action.reasoning || "Done"}`;
         } else {
