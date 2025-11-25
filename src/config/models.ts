@@ -49,7 +49,7 @@ Guidelines:
 6. NEVER call goto multiple times in a row without analyzing the page with ariaTree first
 7. If goto fails or the page doesn't load, stop and close with an error message
 8. ALWAYS call "close" when the task is complete, even if using only MCP tools
-9. Include a clear summary message in the close action
+9. CRITICAL: Include ALL extracted data and results in the close message - don't just say "successfully extracted", include the actual data
 10. If blocked by CAPTCHA, bot detection, or repeated errors, report it and close immediately
 
 Act Best Practices:

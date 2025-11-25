@@ -80,6 +80,33 @@ export function createStreamingHandler(): {
       return;
     }
 
+    // If this is an extraction completion message, show the extracted data
+    if (log.category === "extraction" && log.message.includes("extraction completed successfully")) {
+      const formatted = formatLogMessage(log);
+      sendMessage(formatted);
+
+      // Try to extract and display the result
+      if (log.auxiliary && log.auxiliary.extraction_response) {
+        try {
+          const extractionData = JSON.parse(log.auxiliary.extraction_response.value);
+          if (extractionData.result) {
+            sendMessage("\n📄 Extracted Content:");
+            if (typeof extractionData.result === 'string') {
+              sendMessage(`   ${extractionData.result}`);
+            } else {
+              const formatted = JSON.stringify(extractionData.result, null, 2);
+              const indented = formatted.split('\n').map(line => `   ${line}`).join('\n');
+              sendMessage(indented);
+            }
+            sendMessage("");
+          }
+        } catch (e) {
+          // Ignore parsing errors
+        }
+      }
+      return;
+    }
+
     const formatted = formatLogMessage(log);
     sendMessage(formatted);
   };
@@ -103,22 +130,39 @@ export function createStreamingHandler(): {
         } else if (action.type === "act") {
           actionDesc = `→ Action: ${action.action}`;
         } else if (action.type === "extract") {
-          actionDesc = `→ Extracted data`;
-          // If extraction result exists, format it nicely
-          if (action.extract) {
+          // Check multiple possible property names for the extracted data
+          const extractedData = (action as any).extract || (action as any).result || (action as any).extraction;
+
+          if (extractedData) {
+            sendMessage(`  ${i + 1}. → Extracted data:`);
             try {
-              const formatted = JSON.stringify(action.extract, null, 2);
-              sendMessage(`\n${formatted}\n`);
+              // If it's a string, display it directly; otherwise format as JSON
+              if (typeof extractedData === 'string') {
+                sendMessage(`     ${extractedData}`);
+              } else {
+                const formatted = JSON.stringify(extractedData, null, 2);
+                // Indent each line for better formatting
+                const indented = formatted.split('\n').map(line => `     ${line}`).join('\n');
+                sendMessage(indented);
+              }
             } catch {
               // Ignore formatting errors
             }
+          } else {
+            sendMessage(`  ${i + 1}. → Extracted data`);
           }
         } else if (action.type === "close") {
           actionDesc = `→ Task completed: ${action.reasoning || "Done"}`;
+          sendMessage(`  ${i + 1}. ${actionDesc}`);
         } else {
           actionDesc = `→ ${action.type}`;
+          sendMessage(`  ${i + 1}. ${actionDesc}`);
         }
-        sendMessage(`  ${i + 1}. ${actionDesc}`);
+
+        // For goto, ariaTree, and act, send the message here
+        if (action.type === "goto" || action.type === "ariaTree" || action.type === "act") {
+          sendMessage(`  ${i + 1}. ${actionDesc}`);
+        }
       });
       sendMessage("");
     }
