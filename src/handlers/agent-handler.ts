@@ -88,7 +88,8 @@ async function handleStreamingRequest(
   _env: Env,
   ctx: ExecutionContext
 ): Promise<Response> {
-  const { logger, stream, sendResult, sendError, close } = createStreamingHandler();
+  // Pass variables to streaming handler for redaction
+  const { logger, stream, sendResult, sendError, close } = createStreamingHandler(data.variables);
 
   // Start async execution
   (async () => {

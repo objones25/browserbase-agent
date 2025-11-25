@@ -40,10 +40,35 @@ function formatLogMessage(log: LogMessage): string {
 }
 
 /**
+ * Escapes special regex characters in a string
+ */
+function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Redacts sensitive variable values from text for safe logging
+ */
+function redactSensitiveData(
+  text: string,
+  variables?: Record<string, string>
+): string {
+  if (!variables) return text;
+
+  let result = text;
+  for (const [key, value] of Object.entries(variables)) {
+    // Replace all occurrences of the actual value with [REDACTED:{key}]
+    const escapedValue = escapeRegExp(value);
+    result = result.replace(new RegExp(escapedValue, "g"), `[REDACTED:${key}]`);
+  }
+  return result;
+}
+
+/**
  * Creates a streaming response handler for agent execution
  * Returns a logger function and a ReadableStream for SSE
  */
-export function createStreamingHandler(): {
+export function createStreamingHandler(variables?: Record<string, string>): {
   logger: (message: unknown) => void;
   stream: ReadableStream;
   sendResult: (result: AgentResult) => void;
@@ -66,7 +91,9 @@ export function createStreamingHandler(): {
     if (!controller) return;
 
     try {
-      controller.enqueue(encoder.encode(`${text}\n`));
+      // Redact sensitive data before sending
+      const redacted = redactSensitiveData(text, variables);
+      controller.enqueue(encoder.encode(`${redacted}\n`));
     } catch (error) {
       console.error("Error sending stream message:", error);
     }

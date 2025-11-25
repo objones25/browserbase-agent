@@ -22,6 +22,31 @@ function substituteVariables(
   return result;
 }
 
+/**
+ * Creates a redacted version of text by replacing variable values with [REDACTED]
+ * Used for logging to prevent sensitive data from appearing in logs
+ */
+function redactVariables(
+  text: string,
+  variables?: Record<string, string>
+): string {
+  if (!variables) return text;
+
+  let result = text;
+  for (const [key, value] of Object.entries(variables)) {
+    // Replace all occurrences of the actual value with [REDACTED:{key}]
+    result = result.replace(new RegExp(escapeRegExp(value), "g"), `[REDACTED:${key}]`);
+  }
+  return result;
+}
+
+/**
+ * Escapes special regex characters in a string
+ */
+function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export class AgentExecutor {
   async execute(
     stagehand: Stagehand,
