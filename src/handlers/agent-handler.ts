@@ -5,6 +5,7 @@ import { AgentExecutor } from "../services/agent-executor";
 import { ValidationError, ConfigurationError } from "../utils/errors";
 import { formatSuccess, formatError } from "../utils/response";
 import { MODEL_PROVIDERS, DEFAULT_MODEL } from "../config/models";
+import { createStreamingHandler } from "../utils/streaming";
 
 function getApiKeyForModel(model: string, env: Env): string {
   const provider = model.split("/")[0] as keyof typeof MODEL_PROVIDERS;
@@ -47,7 +48,12 @@ export async function handleAgentRequest(
     const modelName = parsed.data.model || DEFAULT_MODEL;
     const apiKey = getApiKeyForModel(modelName, env);
 
-    // Initialize Stagehand with CF Browser Rendering
+    // Check if streaming is requested
+    if (parsed.data.stream) {
+      return handleStreamingRequest(stagehandService, parsed.data, modelName, apiKey, env, ctx);
+    }
+
+    // Non-streaming path (existing behavior)
     await stagehandService.initialize({
       modelName,
       modelApiKey: apiKey,
@@ -72,4 +78,57 @@ export async function handleAgentRequest(
     ctx.waitUntil(stagehandService.cleanup());
     return formatError(error);
   }
+}
+
+async function handleStreamingRequest(
+  stagehandService: StagehandService,
+  data: any,
+  modelName: string,
+  apiKey: string,
+  _env: Env,
+  ctx: ExecutionContext
+): Promise<Response> {
+  const { logger, stream, sendResult, sendError, close } = createStreamingHandler();
+
+  // Start async execution
+  (async () => {
+    try {
+      // Initialize Stagehand with custom logger
+      await stagehandService.initialize({
+        modelName,
+        modelApiKey: apiKey,
+        systemPrompt: data.systemPrompt,
+        domSettleTimeoutMs: data.domSettleTimeoutMs,
+        verbose: 1,
+        logger,
+      });
+
+      // Execute agent
+      const executor = new AgentExecutor();
+      const result = await executor.execute(
+        stagehandService.getInstance(),
+        data
+      );
+
+      // Send final result
+      sendResult(result);
+      close();
+    } catch (error) {
+      sendError(error instanceof Error ? error : new Error(String(error)));
+      close();
+    } finally {
+      // Cleanup (non-blocking)
+      ctx.waitUntil(stagehandService.cleanup());
+    }
+  })();
+
+  // Return streaming response immediately
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive",
+      "Access-Control-Allow-Origin": "*",
+    },
+  });
 }

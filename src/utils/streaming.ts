@@ -1,0 +1,144 @@
+import { AgentResult } from "../services/agent-executor";
+
+export interface StreamEvent {
+  type: "log" | "action" | "result" | "error";
+  data: unknown;
+  timestamp: number;
+}
+
+interface LogMessage {
+  category?: string;
+  message: string;
+  level?: number;
+  auxiliary?: Record<string, { value: string; type: string }>;
+}
+
+/**
+ * Formats a log message into human-readable text
+ */
+function formatLogMessage(log: LogMessage): string {
+  const { category, message, auxiliary } = log;
+
+  let output = "";
+
+  // Add category prefix
+  if (category) {
+    output += `[${category.toUpperCase()}] `;
+  }
+
+  output += message;
+
+  // Add auxiliary info
+  if (auxiliary) {
+    const auxStr = Object.entries(auxiliary)
+      .map(([key, val]) => `${key}=${val.value}`)
+      .join(", ");
+    output += ` (${auxStr})`;
+  }
+
+  return output;
+}
+
+/**
+ * Creates a streaming response handler for agent execution
+ * Returns a logger function and a ReadableStream for SSE
+ */
+export function createStreamingHandler(): {
+  logger: (message: unknown) => void;
+  stream: ReadableStream;
+  sendResult: (result: AgentResult) => void;
+  sendError: (error: Error) => void;
+  close: () => void;
+} {
+  const encoder = new TextEncoder();
+  let controller: ReadableStreamDefaultController | null = null;
+
+  const stream = new ReadableStream({
+    start(ctrl) {
+      controller = ctrl;
+    },
+    cancel() {
+      controller = null;
+    },
+  });
+
+  function sendMessage(text: string) {
+    if (!controller) return;
+
+    try {
+      controller.enqueue(encoder.encode(`${text}\n`));
+    } catch (error) {
+      console.error("Error sending stream message:", error);
+    }
+  }
+
+  const logger = (message: unknown) => {
+    const log = message as LogMessage;
+
+    // Skip overly verbose logs
+    if (log.category === "extraction" && log.message.includes("Getting accessibility tree data")) {
+      return;
+    }
+
+    const formatted = formatLogMessage(log);
+    sendMessage(formatted);
+  };
+
+  const sendResult = (result: AgentResult) => {
+    sendMessage("\n" + "=".repeat(60));
+    sendMessage("FINAL RESULT");
+    sendMessage("=".repeat(60) + "\n");
+
+    sendMessage(`Status: ${result.success ? "✓ Success" : "✗ Failed"}\n`);
+    sendMessage(`Message: ${result.message}\n`);
+
+    if (result.actions && result.actions.length > 0) {
+      sendMessage(`Actions taken: ${result.actions.length}`);
+      result.actions.forEach((action, i) => {
+        let actionDesc = "";
+        if (action.type === "goto") {
+          actionDesc = `→ Navigated to: ${action.url || action.pageUrl}`;
+        } else if (action.type === "ariaTree") {
+          actionDesc = `→ Analyzed page structure`;
+        } else if (action.type === "act") {
+          actionDesc = `→ Action: ${action.action}`;
+        } else if (action.type === "extract") {
+          actionDesc = `→ Extracted data`;
+        } else if (action.type === "close") {
+          actionDesc = `→ Task completed: ${action.reasoning || "Done"}`;
+        } else {
+          actionDesc = `→ ${action.type}`;
+        }
+        sendMessage(`  ${i + 1}. ${actionDesc}`);
+      });
+      sendMessage("");
+    }
+
+    if (result.usage) {
+      sendMessage(`Usage:`);
+      sendMessage(`  Input tokens: ${result.usage.input_tokens.toLocaleString()}`);
+      sendMessage(`  Output tokens: ${result.usage.output_tokens.toLocaleString()}`);
+      sendMessage(`  Inference time: ${(result.usage.inference_time_ms / 1000).toFixed(2)}s`);
+    }
+
+    sendMessage("=".repeat(60));
+  };
+
+  const sendError = (error: Error) => {
+    sendMessage(`\n❌ ERROR: ${error.message}\n`);
+  };
+
+  const close = () => {
+    if (controller) {
+      try {
+        controller.close();
+      } catch (error) {
+        // Controller might already be closed
+        console.error("Error closing stream:", error);
+      }
+      controller = null;
+    }
+  };
+
+  return { logger, stream, sendResult, sendError, close };
+}

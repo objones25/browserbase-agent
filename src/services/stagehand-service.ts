@@ -9,6 +9,7 @@ export interface StagehandConfig {
   systemPrompt?: string;
   domSettleTimeoutMs?: number;
   verbose?: 0 | 1 | 2;
+  logger?: (message: unknown) => void;
 }
 
 export class StagehandService {
@@ -32,7 +33,7 @@ export class StagehandService {
       enableCaching: false,
       // Default to 0 in production to prevent secrets in logs
       verbose: config.verbose ?? 0,
-      logger: (message) => console.log(JSON.stringify(message)),
+      logger: config.logger || ((message) => console.log(JSON.stringify(message))),
       // DOM settle timeout for dynamic SPAs
       domSettleTimeoutMs: config.domSettleTimeoutMs,
       // Enable experimental features (required for MCP integrations)

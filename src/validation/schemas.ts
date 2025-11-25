@@ -27,6 +27,9 @@ export const agentRequestSchema = z.object({
   // MCP server integrations (URLs to MCP servers)
   // Example: ["https://mcp.exa.ai/mcp?exaApiKey=xxx"]
   integrations: z.array(z.string().url()).optional(),
+
+  // Enable streaming response via Server-Sent Events
+  stream: z.boolean().optional().default(false),
 });
 
 export type ValidatedRequest = z.infer<typeof agentRequestSchema>;

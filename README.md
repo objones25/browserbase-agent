@@ -82,6 +82,7 @@ Execute a browser automation task.
 | `iframes` | boolean | No | Enable iframe support (default: false) |
 | `waitBetweenActions` | number | No | Delay between actions in ms (0-10000) |
 | `integrations` | string[] | No | MCP server URLs for external tool access |
+| `stream` | boolean | No | Enable streaming response via Server-Sent Events (default: false) |
 
 #### Example Request
 
@@ -111,6 +112,29 @@ curl -X POST http://localhost:8787 \
 ```
 
 Variables are substituted client-side and never sent to the LLM.
+
+#### Example with Streaming
+
+```bash
+curl -N -X POST http://localhost:8787 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Search for Stagehand browser automation",
+    "url": "https://google.com",
+    "maxSteps": 15,
+    "stream": true
+  }'
+```
+
+Streaming responses use Server-Sent Events (SSE) and send real-time updates as the agent executes. Each event is JSON formatted:
+
+```json
+data: {"type":"log","data":{...},"timestamp":1234567890}
+
+data: {"type":"action","data":{...},"timestamp":1234567890}
+
+data: {"type":"result","data":{...},"timestamp":1234567890}
+```
 
 #### Response
 
