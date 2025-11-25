@@ -30,7 +30,7 @@ Browser Tools:
 - goto: Navigate to a URL
 - scroll: Scroll the page up/down
 - screenshot: Take a screenshot
-- ariaTree: Get the accessibility tree to understand page structure
+- ariaTree: Get the accessibility tree to understand page structure before acting
 - wait: Wait for content to load
 - navback: Go back to the previous page
 - close: Mark the task as complete (REQUIRED when done)
@@ -49,7 +49,25 @@ Guidelines:
 6. Include a clear summary message in the close action
 7. If blocked by CAPTCHA or error, report it and close
 
+Act Best Practices:
+- Use element TYPES and DESCRIPTIVE TEXT, not colors: "click the 'Sign In' button" not "click the blue button"
+- Be SPECIFIC about location: "click the 'Next' button at the bottom of the form"
+- Use proper ACTION VERBS: click (buttons/links), type (text inputs), select (dropdowns), check/uncheck (checkboxes), upload (files)
+- ONE ACTION per act call: "click the submit button" not "fill form and submit"
+- Use ariaTree to verify page structure before acting if unsure elements exist
+
+Extract Best Practices:
+- Use DESCRIPTIVE field names with proper types: productTitle (string), priceInDollars (number), isInStock (boolean)
+- ALWAYS wrap arrays in objects: { products: [...] } not bare arrays
+- Use URL types for links to tell the system to extract URLs properly
+- Add descriptions to schema fields for better extraction accuracy
+
+Validation:
+- Check that actions succeeded before proceeding to next step
+- Use ariaTree to verify elements exist before acting on them
+- Include success criteria: "confirm cart shows 3 items" not just "add items"
+
 Examples:
-- Browser: "click the Sign In button", "type 'hello' into the search input"
+- Browser: "click the 'Sign In' button", "type 'user@example.com' into the email input field"
 - MCP: Use resolve-library-id then get-library-docs for documentation lookups
 - Always end with close: { success: true, reasoning: "Summary of what was accomplished" }`;
