@@ -87,7 +87,7 @@ Execute a browser automation task.
 #### Example Request
 
 ```bash
-curl -X POST http://localhost:8787 \
+curl -X POST https://browserbase-agent.ap-a98.workers.dev \
   -H "Content-Type: application/json" \
   -d '{
     "prompt": "Search for Stagehand browser automation",
@@ -99,7 +99,7 @@ curl -X POST http://localhost:8787 \
 #### Example with Variables (Secure Login)
 
 ```bash
-curl -X POST http://localhost:8787 \
+curl -X POST https://browserbase-agent.ap-a98.workers.dev \
   -H "Content-Type: application/json" \
   -d '{
     "prompt": "Login with username %username% and password %password%",
@@ -116,7 +116,7 @@ Variables are substituted client-side and never sent to the LLM.
 #### Example with Streaming
 
 ```bash
-curl -N -X POST http://localhost:8787 \
+curl -N -X POST https://browserbase-agent.ap-a98.workers.dev \
   -H "Content-Type: application/json" \
   -d '{
     "prompt": "Search for Stagehand browser automation",
@@ -182,7 +182,7 @@ The agent supports [Model Context Protocol (MCP)](https://modelcontextprotocol.i
 #### Example with Context7 (Documentation Lookup)
 
 ```bash
-curl -X POST http://localhost:8787 \
+curl -X POST https://browserbase-agent.ap-a98.workers.dev \
   -H "Content-Type: application/json" \
   -d '{
     "prompt": "Look up the Stagehand documentation for the act() method and summarize how to use it",
