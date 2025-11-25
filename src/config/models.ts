@@ -77,4 +77,7 @@ Validation:
 Examples:
 - Browser: "click the 'Sign In' button", "type 'user@example.com' into the email input field"
 - MCP: Use resolve-library-id then get-library-docs for documentation lookups
-- Always end with close: { success: true, reasoning: "Summary of what was accomplished" }`;
+- Extraction workflow: goto → ariaTree → extract → close with extracted data in message
+- EVERY task must end with close tool call - this is NOT optional
+
+Remember: The task is NOT complete until you call close. If you don't call close, the task will be marked as failed.`;
