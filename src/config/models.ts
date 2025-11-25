@@ -61,10 +61,12 @@ Act Best Practices:
 
 Extract Best Practices:
 - Use DESCRIPTIVE field names with proper types: productTitle (string), priceInDollars (number), isInStock (boolean)
-- ALWAYS wrap arrays in objects: { products: [...] } not bare arrays
-- Use URL types for links to tell the system to extract URLs properly
+- ALWAYS wrap arrays in objects: { posts: [...] } not bare arrays
+- Extract works best with VISIBLE TEXT content: headings, paragraphs, labels, prices, descriptions
+- LIMITATION: Extract uses accessibility tree which may not include href attributes or other HTML attributes
+- For extracting links/URLs: You may need to use act() to click links and navigate instead of extract
 - Add descriptions to schema fields for better extraction accuracy
-- Be SPECIFIC in extraction instructions: "Extract the top 5 article titles and URLs" not "Extract articles"
+- Be SPECIFIC in extraction instructions: "Extract the product title, price, and description"
 - When extracting structured data, explicitly state what fields you need and their format
 
 Validation:

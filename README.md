@@ -275,18 +275,17 @@ curl -N -X POST https://browserbase-agent.ap-a98.workers.dev \
   }'
 ```
 
-### News Aggregation
+### Product Information Extraction
 
-Extract headlines and summaries from news sites:
+Extract structured product data from e-commerce pages:
 
 ```bash
 curl -N -X POST https://browserbase-agent.ap-a98.workers.dev \
   -H "Content-Type: application/json" \
   -d '{
-    "prompt": "Go to news.ycombinator.com and extract the titles and URLs of the top 5 posts",
-    "url": "https://news.ycombinator.com",
+    "prompt": "Go to the Stagehand documentation homepage and extract the main heading and the description text that explains what Stagehand does",
+    "url": "https://docs.stagehand.dev",
     "maxSteps": 10,
-    "domSettleTimeoutMs": 2000,
     "stream": true
   }'
 ```
