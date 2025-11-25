@@ -6,6 +6,7 @@ A Cloudflare Worker that exposes an AI-powered browser automation agent as an AP
 
 - Natural language browser automation via REST API
 - Multiple LLM provider support (Google Gemini, OpenAI, Anthropic)
+- **MCP integrations** for external tools (search, databases, documentation)
 - Secure variable substitution for sensitive data (passwords, API keys)
 - iframe support for embedded content
 - Configurable timeouts and action delays
@@ -80,6 +81,7 @@ Execute a browser automation task.
 | `domSettleTimeoutMs` | number | No | Wait time for dynamic content (1000-60000ms) |
 | `iframes` | boolean | No | Enable iframe support (default: false) |
 | `waitBetweenActions` | number | No | Delay between actions in ms (0-10000) |
+| `integrations` | string[] | No | MCP server URLs for external tool access |
 
 #### Example Request
 
@@ -148,6 +150,36 @@ Variables are substituted client-side and never sent to the LLM.
 | Google | `google/gemini-2.5-flash` | Default, recommended for speed/cost |
 | OpenAI | `openai/gpt-4.1` | High accuracy for complex sites |
 | Anthropic | `anthropic/claude-3-7-sonnet-latest` | Excellent reasoning |
+
+## MCP Integrations
+
+The agent supports [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) integrations for external tools. Pass MCP server URLs via the `integrations` parameter to give the agent access to documentation, search, databases, and more.
+
+#### Example with Context7 (Documentation Lookup)
+
+```bash
+curl -X POST http://localhost:8787 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Look up the Stagehand documentation for the act() method and summarize how to use it",
+    "integrations": [
+      "https://mcp.context7.com/mcp?apiKey=YOUR_CONTEXT7_API_KEY"
+    ],
+    "maxSteps": 10
+  }'
+```
+
+#### Supported MCP Servers
+
+Any MCP-compatible server can be used. Popular options include:
+
+| Server | Description |
+|--------|-------------|
+| [Context7](https://context7.com) | Documentation lookup for libraries |
+| [Tavily](https://tavily.com) | Web search |
+| Custom servers | Any MCP-compliant endpoint |
+
+The agent will automatically discover available tools from the MCP server and use them when appropriate for the task.
 
 ## Architecture
 

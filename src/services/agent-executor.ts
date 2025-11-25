@@ -52,6 +52,8 @@ export class AgentExecutor {
       // Create agent - uses model configured in Stagehand init
       const agent = stagehand.agent({
         instructions: systemInstructions,
+        // Pass MCP server URLs for external tool integrations
+        integrations: request.integrations,
       });
 
       // Execute the task with all options

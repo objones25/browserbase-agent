@@ -23,6 +23,10 @@ export const agentRequestSchema = z.object({
 
   // Wait between actions (ms) - useful for rate-limited sites
   waitBetweenActions: z.number().int().min(0).max(10000).optional(),
+
+  // MCP server integrations (URLs to MCP servers)
+  // Example: ["https://mcp.exa.ai/mcp?exaApiKey=xxx"]
+  integrations: z.array(z.string().url()).optional(),
 });
 
 export type ValidatedRequest = z.infer<typeof agentRequestSchema>;

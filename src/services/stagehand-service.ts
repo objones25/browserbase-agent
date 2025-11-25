@@ -35,6 +35,8 @@ export class StagehandService {
       logger: (message) => console.log(JSON.stringify(message)),
       // DOM settle timeout for dynamic SPAs
       domSettleTimeoutMs: config.domSettleTimeoutMs,
+      // Enable experimental features (required for MCP integrations)
+      experimental: true,
     });
 
     await this.stagehand.init();
