@@ -43,15 +43,9 @@ export class AgentExecutor {
       // Substitute variables in prompt (for sensitive data)
       const instruction = substituteVariables(request.prompt, request.variables);
 
-      // Build system instructions with optional context
-      let systemInstructions = request.systemPrompt || DEFAULT_SYSTEM_PROMPT;
-      if (request.context) {
-        systemInstructions += `\n\nAdditional context:\n${request.context}`;
-      }
-
       // Create agent - uses model configured in Stagehand init
       const agent = stagehand.agent({
-        instructions: systemInstructions,
+        instructions: request.systemPrompt || DEFAULT_SYSTEM_PROMPT,
         // Pass MCP server URLs for external tool integrations
         integrations: request.integrations,
       });
@@ -61,6 +55,8 @@ export class AgentExecutor {
         instruction,
         maxSteps: request.maxSteps || 20,
         waitBetweenActions: request.waitBetweenActions,
+        // Pass context directly to execute instead of appending to system prompt
+        context: request.context,
       });
 
       return result;
