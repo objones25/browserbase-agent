@@ -179,6 +179,23 @@ data: {"type":"result","data":{...},"timestamp":1234567890}
 
 The agent supports [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) integrations for external tools. Pass MCP server URLs via the `integrations` parameter to give the agent access to documentation, search, databases, and more.
 
+#### Example with Cloudflare Docs MCP (with Streaming)
+
+```bash
+curl -N -X POST https://browserbase-agent.ap-a98.workers.dev \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Search the Cloudflare documentation for information about Browser Rendering and explain how to use it",
+    "integrations": [
+      "https://docs.mcp.cloudflare.com/mcp"
+    ],
+    "maxSteps": 10,
+    "stream": true
+  }'
+```
+
+This example uses the Cloudflare documentation MCP server to search and retrieve information without opening a browser, while streaming the results in real-time.
+
 #### Example with Context7 (Documentation Lookup)
 
 ```bash
@@ -199,6 +216,9 @@ Any MCP-compatible server can be used. Popular options include:
 
 | Server | Description |
 |--------|-------------|
+| [Cloudflare Docs](https://docs.mcp.cloudflare.com/mcp) | Search Cloudflare documentation |
+| [Cloudflare Browser](https://browser.mcp.cloudflare.com/mcp) | Browser rendering automation |
+| [Cloudflare Radar](https://radar.mcp.cloudflare.com/mcp) | Internet insights and analytics |
 | [Context7](https://context7.com) | Documentation lookup for libraries |
 | [Tavily](https://tavily.com) | Web search |
 | Custom servers | Any MCP-compliant endpoint |
